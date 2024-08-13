@@ -1,0 +1,496 @@
+<html><head><base href="https://apartmentbookingapp.com/%20when%20I%20hover%20on%20a%20booked%20range,%20I%20want%20to%20see%20the%20name%20of%20who%20booked%20it.%20I%20want%20you%20to%20ad%20an%20exit%20button%20on%20any%20pop%20up%20that%20shows%20through%20the%20process.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FriendSpace Apartment Booking - Airbnb Style</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --airbnb-red: #FF5A5F;
+      --airbnb-teal: #00A699;
+      --airbnb-dark-gray: #484848;
+      --airbnb-light-gray: #767676;
+      --cheese-yellow: #FFA600;
+    }
+
+    body {
+      font-family: 'Roboto', Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+      color: var(--airbnb-dark-gray);
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #EBEBEB;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--airbnb-dark-gray);
+    }
+
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .nav-buttons button {
+      background: transparent;
+      border: none;
+      color: var(--airbnb-dark-gray);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin: 40px 0 20px;
+    }
+
+    .year-input {
+      margin-bottom: 20px;
+    }
+
+    .year-input input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #EBEBEB;
+      border-radius: 4px;
+    }
+
+    .calendar-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .month-calendar {
+      border: 1px solid #EBEBEB;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .month-title {
+      background-color: var(--airbnb-red);
+      color: white;
+      padding: 10px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: #EBEBEB;
+    }
+
+    .calendar-day {
+      background-color: white;
+      aspect-ratio: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      background-color: #F7F7F7;
+    }
+
+    .booked-day {
+      background-color: var(--airbnb-teal);
+      color: white;
+    }
+
+    .free-day {
+      background-color: white;
+    }
+
+    .empty-day {
+      background-color: #F7F7F7;
+    }
+
+    .selected-day {
+      background-color: var(--airbnb-red);
+      color: white;
+    }
+
+    .in-range-day {
+      background-color: #FFE6E6;
+    }
+
+    .booking-tooltip {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      display: none;
+      z-index: 10;
+    }
+
+    .booked-day:hover .booking-tooltip {
+      display: block;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #EBEBEB;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: var(--airbnb-red);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #E74E54;
+    }
+
+    .alert {
+      background-color: #FFF8F6;
+      border: 1px solid var(--airbnb-red);
+      color: var(--airbnb-red);
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--airbnb-dark-gray);
+    }
+
+    .close-button:hover {
+      color: var(--airbnb-red);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="logo">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 0 A50 50 0 1 1 50 100 A50 50 0 1 1 50 0 Z" fill="var(--cheese-yellow)"/>
+          <circle cx="30" cy="30" r="10" fill="white"/>
+          <circle cx="70" cy="40" r="15" fill="white"/>
+          <circle cx="40" cy="70" r="12" fill="white"/>
+          <path d="M0 50 Q25 60 50 50 T100 50" fill="none" stroke="var(--airbnb-dark-gray)" stroke-width="2"/>
+        </svg>
+        FriendSpace
+      </div>
+      <nav class="nav-buttons">
+        <button v-if="!currentUser" @click="showLoginModal = true">Log in</button>
+        <button v-if="!currentUser" @click="showSignupModal = true">Sign up</button>
+        <button v-if="currentUser" @click="logout">Log out</button>
+      </nav>
+    </header>
+
+    <h1>Apartment Availability Calendar</h1>
+
+    <div class="year-input">
+      <label for="yearInput">Year: </label>
+      <input type="number" id="yearInput" v-model="currentYear" @change="updateCalendar">
+    </div>
+
+    <div class="calendar-container">
+      <div v-for="month in 12" :key="month" class="month-calendar">
+        <div class="month-title">{{ getMonthName(month - 1) }}</div>
+        <div class="calendar">
+          <div v-for="dayInfo in getMonthDays(month)" :key="dayInfo.day" 
+               :class="['calendar-day', 
+                        { 'booked-day': isBookedDay(dayInfo.date), 
+                          'free-day': !isBookedDay(dayInfo.date) && dayInfo.day !== 0, 
+                          'empty-day': dayInfo.day === 0,
+                          'selected-day': isSelectedDay(dayInfo.date),
+                          'in-range-day': isInRange(dayInfo.date) }]"
+               @click="selectDate(dayInfo.date)">
+            {{ dayInfo.day !== 0 ? dayInfo.day : '' }}
+            <div v-if="isBookedDay(dayInfo.date)" class="booking-tooltip">
+              Booked by: {{ getBookingUser(dayInfo.date) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="!currentUser" class="alert">
+      Please log in or sign up to book the apartment.
+    </div>
+
+    <!-- Login Modal -->
+    <div v-if="showLoginModal" class="modal">
+      <div class="modal-content">
+        <button class="close-button" @click="showLoginModal = false">&times;</button>
+        <h2 class="modal-title">Log in</h2>
+        <form @submit.prevent="login">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" v-model="loginEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" v-model="loginPassword" required>
+          </div>
+          <button type="submit">Log in</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div v-if="showSignupModal" class="modal">
+      <div class="modal-content">
+        <button class="close-button" @click="showSignupModal = false">&times;</button>
+        <h2 class="modal-title">Sign up</h2>
+        <form @submit.prevent="signup">
+          <div class="form-group">
+            <label for="signupName">Name</label>
+            <input type="text" id="signupName" v-model="signupName" required>
+          </div>
+          <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" v-model="signupEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" v-model="signupPassword" required>
+          </div>
+          <button type="submit">Sign up</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div v-if="showBookingModal" class="modal">
+      <div class="modal-content">
+        <button class="close-button" @click="cancelBooking">&times;</button>
+        <h2 class="modal-title">Book Apartment</h2>
+        <p>Selected dates: {{ formattedDateRange }}</p>
+        <button @click="bookApartment">Confirm Booking</button>
+        <button @click="cancelBooking" style="background-color: var(--airbnb-light-gray); margin-left: 10px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        currentUser: null,
+        showLoginModal: false,
+        showSignupModal: false,
+        showBookingModal: false,
+        loginEmail: '',
+        loginPassword: '',
+        signupName: '',
+        signupEmail: '',
+        signupPassword: '',
+        startDate: null,
+        endDate: null,
+        currentYear: new Date().getFullYear(),
+        bookings: []
+      },
+      computed: {
+        formattedDateRange() {
+          if (this.startDate && this.endDate) {
+            return `${this.formatDate(this.startDate)} to ${this.formatDate(this.endDate)}`;
+          } else if (this.startDate) {
+            return this.formatDate(this.startDate);
+          }
+          return '';
+        }
+      },
+      methods: {
+        formatDate(date) {
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        },
+        getMonthName(monthIndex) {
+          return new Date(this.currentYear, monthIndex).toLocaleString('default', { month: 'long' });
+        },
+        getMonthDays(month) {
+          const firstDay = new Date(this.currentYear, month - 1, 1);
+          const lastDay = new Date(this.currentYear, month, 0);
+          const daysInMonth = lastDay.getDate();
+          const startingDayOfWeek = firstDay.getDay();
+
+          let days = [];
+          for (let i = 0; i < startingDayOfWeek; i++) {
+            days.push({ day: 0, date: null });
+          }
+          for (let i = 1; i <= daysInMonth; i++) {
+            days.push({ day: i, date: new Date(this.currentYear, month - 1, i) });
+          }
+          return days;
+        },
+        isBookedDay(date) {
+          if (!date) return false;
+          return this.bookings.some(booking => 
+            date >= new Date(booking.start) && date <= new Date(booking.end)
+          );
+        },
+        getBookingUser(date) {
+          if (!date) return '';
+          const booking = this.bookings.find(booking => 
+            date >= new Date(booking.start) && date <= new Date(booking.end)
+          );
+          return booking ? booking.user : '';
+        },
+        isSelectedDay(date) {
+          return date && (
+            (this.startDate && date.getTime() === this.startDate.getTime()) ||
+            (this.endDate && date.getTime() === this.endDate.getTime())
+          );
+        },
+        isInRange(date) {
+          return date && this.startDate && this.endDate &&
+                 date > this.startDate && date < this.endDate;
+        },
+        selectDate(date) {
+          if (!date || this.isBookedDay(date)) return;
+          
+          if (this.currentUser) {
+            if (!this.startDate || (this.startDate && this.endDate)) {
+              this.startDate = date;
+              this.endDate = null;
+            } else if (date > this.startDate) {
+              this.endDate = date;
+              this.showBookingModal = true;
+            } else {
+              this.startDate = date;
+              this.endDate = null;
+            }
+          } else {
+            this.showLoginModal = true;
+          }
+        },
+        login() {
+          // Simulated login logic
+          this.currentUser = { name: 'John Doe', email: this.loginEmail };
+          this.showLoginModal = false;
+        },
+        signup() {
+          // Simulated signup logic
+          this.currentUser = { name: this.signupName, email: this.signupEmail };
+          this.showSignupModal = false;
+        },
+        logout() {
+          this.currentUser = null;
+          this.startDate = null;
+          this.endDate = null;
+        },
+        bookApartment() {
+          // Simulated booking logic
+          this.bookings.push({
+            start: this.startDate,
+            end: this.endDate,
+            user: this.currentUser.name
+          });
+          this.showBookingModal = false;
+          this.startDate = null;
+          this.endDate = null;
+        },
+        cancelBooking() {
+          this.showBookingModal = false;
+          this.startDate = null;
+          this.endDate = null;
+        },
+        updateCalendar() {
+          // This method is called when the year input changes
+          // We don't need to do anything here as Vue will automatically update the calendar
+          // when currentYear changes, but you could add additional logic if needed
+        }
+      },
+      mounted() {
+        // Simulated initial bookings
+        this.bookings = [
+          { start: new Date(this.currentYear, 0, 10), end: new Date(this.currentYear, 0, 15), user: 'Alice' },
+          { start: new Date(this.currentYear, 1, 5), end: new Date(this.currentYear, 1, 10), user: 'Bob' },
+          { start: new Date(this.currentYear, 2, 20), end: new Date(this.currentYear, 2, 25), user: 'Charlie' },
+        ];
+      }
+    });
+  </script>
+</body></html>
